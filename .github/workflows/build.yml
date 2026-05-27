@@ -1,4 +1,4 @@
-name: Android Build APK
+name: Flutter Build APK
 
 on:
   push:
@@ -13,21 +13,28 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up JDK 17
+    - name: Set up Java
       uses: actions/setup-java@v4
       with:
         distribution: 'zulu'
         java-version: '17'
-        cache: 'gradle'
 
-    - name: Make Gradle executable
-      run: chmod +x gradlew
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Generate Gradle wrapper
+      run: cd android && gradle wrapper && chmod +x gradlew
 
     - name: Build APK
-      run: ./gradlew assembleDebug
+      run: flutter build apk --release
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: debug-apk
-        path: app/build/outputs/apk/debug/app-debug.apk
+        name: release-apk
+        path: build/app/outputs/flutter-apk/app-release.apk
